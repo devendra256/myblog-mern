@@ -1,21 +1,10 @@
-import { useState } from 'react'
-// import ReactQuill from 'react-quill'
-import 'react-quill/dist/quill.snow.css'
-import { Navigate } from 'react-router-dom'
-import Editor from '../components/Editor'
+import { useEffect, useState } from 'react'
+import { Navigate, useParams } from 'react-router-dom'
+import Editor from '../components/Editor';
 
-const modules = {
-    toolbar: [
-        [{ 'header': [1, 2, false] }],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-        ['link', 'image'],
-        ['clean']
-    ],
-}
+function EditPost() {
 
-
-function CreatePost() {
+    const { id } = useParams();
 
     const [title, setTitle] = useState('');
     const [summary, setSummary] = useState('');
@@ -23,33 +12,45 @@ function CreatePost() {
     const [files, setFiles] = useState('');
     const [redirect, setRedirect] = useState(false);
 
-    // create function to handle form submission
-    async function createPost(e) {
+    useEffect(() => {
+        // console.log(id);
+        fetch(`http://localhost:4000/post/${id}`)
+            .then(response => {
+                response.json().then(postInfo => {
+                    setTitle(postInfo.title);
+                    setContent(postInfo.content);
+                    setSummary(postInfo.summary);
+                })
+            })
+    }, [])
+
+    async function updatePost(e) {
+        e.preventDefault();
         const data = new FormData();
         data.set('title', title);
         data.set('summary', summary);
         data.set('content', content);
-        data.set('file', files[0]);
-
-        e.preventDefault();
+        data.set('id', id);
+        if (files?.[0]) {
+            data.set('file', files?.[0]);
+        }
 
         const response = await fetch('http://localhost:4000/post', {
-            method: 'POST',
+            method: 'PUT',
             body: data,
             credentials: 'include',
-        })
-
+        });
         if (response.ok) {
             setRedirect(true);
         }
     }
 
     if (redirect) {
-        return <Navigate to={'/'} />
+        return <Navigate to={'/post/' + id} />
     }
 
     return (
-        <form onSubmit={createPost}>
+        <form onSubmit={updatePost}>
             <input
                 type="text"
                 placeholder={'Title'}
@@ -67,10 +68,10 @@ function CreatePost() {
                 onChange={e => setFiles(e.target.files)}
             />
             <Editor value={content} onChange={setContent} />
-            <button style={{ marginTop: '8px' }}>Create post</button>
+            <button style={{ marginTop: '8px' }}>Update post</button>
 
         </form>
     )
 }
 
-export default CreatePost;
+export default EditPost;
