@@ -1,21 +1,28 @@
 import React from 'react'
 
-const Post = () => {
+import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
+
+const Post = ({ _id, title, summary, content, cover, createdAt, author }) => {
     return (
         <div className='post'>
             <div className='image'>
-                <img src="https://techcrunch.com/wp-content/uploads/2024/05/Screenshot-2024-05-14-at-12.04.58%E2%80%AFPM.png?resize=1200,674" alt="" />
+                <Link to={`/post/${_id}`}>
+                    <img src={'http://localhost:4000/' + cover} alt="" />
+                </Link>
             </div>
             <div className='texts'>
-                <h2>Google I/O 2024: Here's everything Google just announced</h2>
+                <Link to={`/post/${_id}`}>
+                    <h2>{title}</h2>
+                </Link>
                 <p className='info'>
-                    <span className='author'>John Doe</span>
-                    <time>2023-12-06 09:45</time>
+                    <span className='author'>{author.username}</span>
+                    <time>{format(new Date(createdAt), 'MMM d, yyyy HH:mm')}</time>
                 </p>
-                <p className='summary'>Google I/O keynote day! Google kicked off its developer conference each year with a rapid-fire stream of announcements, including many unveilings of recent things it's been working on</p>
+                <p className='summary'>{summary}</p>
             </div>
         </div>
     )
 }
 
-export default Post
+export default Post;
